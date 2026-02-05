@@ -11,7 +11,6 @@ create table if not exists public.student_registrations (
   academic_status text not null check (academic_status in ('School (Class 9–10)', 'Class 11', 'Class 12', 'Repeater')),
   target_exam text not null check (target_exam in ('NEET 2026', 'NEET 2027 & beyond')),
   referral_code text,
-  -- referral_code is set from affiliate-generated ?ref= links only.
   status text not null default 'registered' check (status in ('registered', 'paid', 'completed')),
   created_at timestamptz not null default now()
 );

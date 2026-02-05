@@ -6,13 +6,6 @@ React + Vite portal for `portal.physicsnotebook.in` with:
 - Hidden affiliate access at `/affiliate` (direct URL only)
 - Optional admin stub at `/admin`
 
-## Product rules in this MVP
-
-- Students only register. No student login or dashboard.
-- Registration form has no referral-code input field.
-- Referrals are captured only through affiliate-generated links using `?ref=...`.
-- Affiliate functionality is not visible in the student UI.
-
 ## Setup
 
 1. Install dependencies:

@@ -1,5 +1,4 @@
-import { FormEvent, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { FormEvent, useState } from 'react';
 import PageShell from '../components/PageShell';
 import { supabase } from '../lib/supabase';
 import type { AcademicStatus, TargetExam } from '../lib/types';
@@ -11,6 +10,7 @@ type FormData = {
   parentMobile: string;
   academicStatus: AcademicStatus;
   targetExam: TargetExam;
+  referralCode: string;
   acceptedPolicy: boolean;
 };
 
@@ -21,19 +21,15 @@ const initialFormData: FormData = {
   parentMobile: '',
   academicStatus: 'School (Class 9–10)',
   targetExam: 'NEET 2026',
+  referralCode: '',
   acceptedPolicy: false,
 };
 
 export default function RegisterPage() {
-  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const referralFromLink = useMemo(() => {
-    const value = searchParams.get('ref');
-    return value ? value.trim().toUpperCase() : '';
-  }, [searchParams]);
 
   const setField = <K extends keyof FormData>(field: K, value: FormData[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -53,7 +49,7 @@ export default function RegisterPage() {
     try {
       let matchedAffiliateId: string | null = null;
       let referralCodeToSave: string | null = null;
-      const referralInput = referralFromLink;
+      const referralInput = formData.referralCode.trim().toUpperCase();
 
       if (referralInput) {
         const { data: affiliate } = await supabase
@@ -186,6 +182,15 @@ export default function RegisterPage() {
             <option>NEET 2026</option>
             <option>NEET 2027 &amp; beyond</option>
           </select>
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">Referral Code (optional)</span>
+          <input
+            className="w-full rounded-md border border-slate-300 p-2 text-sm uppercase focus:border-blue-500 focus:outline-none"
+            value={formData.referralCode}
+            onChange={(event) => setField('referralCode', event.target.value)}
+          />
         </label>
 
         <label className="flex items-start gap-2 rounded-md border border-slate-200 p-3 text-sm">

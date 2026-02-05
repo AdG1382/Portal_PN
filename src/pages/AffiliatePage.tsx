@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import PageShell from '../components/PageShell';
 import { supabase } from '../lib/supabase';
@@ -92,12 +92,6 @@ function AffiliateLogin() {
 function AffiliateDashboard({ profile }: { profile: AffiliateProfile }) {
   const [rows, setRows] = useState<AffiliateReferralRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
-
-  const referralLink = useMemo(
-    () => `${window.location.origin}/register?ref=${encodeURIComponent(profile.referral_code)}`,
-    [profile.referral_code],
-  );
 
   useEffect(() => {
     const load = async () => {
@@ -117,17 +111,8 @@ function AffiliateDashboard({ profile }: { profile: AffiliateProfile }) {
     void load();
   }, [profile.id]);
 
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(referralLink);
-      setCopyState('copied');
-    } catch {
-      setCopyState('error');
-    }
-  };
-
   return (
-    <PageShell title={`Welcome, ${profile.name}`} subtitle="Affiliate dashboard (read-only)">
+    <PageShell title={`Welcome, ${profile.name}`} subtitle={`Referral code: ${profile.referral_code}`}>
       <div className="mb-4 flex justify-end">
         <button
           type="button"
@@ -138,23 +123,8 @@ function AffiliateDashboard({ profile }: { profile: AffiliateProfile }) {
         </button>
       </div>
 
-      <section className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
-        <h2 className="text-sm font-semibold text-slate-900">Your Referral Link</h2>
-        <p className="mt-2 break-all rounded-md border border-slate-200 bg-white p-2 text-xs text-slate-700">{referralLink}</p>
-        <div className="mt-3 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={handleCopyLink}
-            className="rounded-md bg-slate-900 px-3 py-2 text-xs text-white hover:bg-slate-800"
-          >
-            Copy Link
-          </button>
-          {copyState === 'copied' ? <span className="text-xs text-emerald-700">Copied.</span> : null}
-          {copyState === 'error' ? <span className="text-xs text-red-600">Copy failed.</span> : null}
-        </div>
-      </section>
-
       {loading ? <p className="text-sm text-slate-600">Loading referrals...</p> : null}
+
       {!loading && rows.length === 0 ? <p className="text-sm text-slate-600">No referrals yet.</p> : null}
 
       {!loading && rows.length > 0 ? (
@@ -187,7 +157,6 @@ export default function AffiliatePage() {
   const [loading, setLoading] = useState(true);
   const [isAffiliate, setIsAffiliate] = useState(false);
   const [profile, setProfile] = useState<AffiliateProfile | null>(null);
-  const [redirectToRegister, setRedirectToRegister] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -209,7 +178,6 @@ export default function AffiliatePage() {
 
       if (!affiliate) {
         await supabase.auth.signOut();
-        setRedirectToRegister(true);
         setLoading(false);
         return;
       }
@@ -232,10 +200,6 @@ export default function AffiliatePage() {
 
   if (loading) {
     return <PageShell title="Affiliate Access">Checking access...</PageShell>;
-  }
-
-  if (redirectToRegister) {
-    return <Navigate to="/register" replace />;
   }
 
   if (!isAffiliate) {

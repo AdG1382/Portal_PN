@@ -39,14 +39,14 @@ alter table public.affiliates enable row level security;
 alter table public.affiliate_referrals enable row level security;
 
 -- Public can only insert student registrations.
-create policy if not exists "public_can_insert_student_registration"
+create policy "public_can_insert_student_registration"
 on public.student_registrations
 for insert
 to anon, authenticated
 with check (true);
 
 -- No broad read access to student registrations.
-create policy if not exists "affiliates_can_read_referred_students"
+create policy "affiliates_can_read_referred_students"
 on public.student_registrations
 for select
 to authenticated
@@ -62,14 +62,14 @@ using (
 );
 
 -- Affiliates can read only their own active profile row.
-create policy if not exists "affiliate_can_read_own_profile"
+create policy "affiliate_can_read_own_profile"
 on public.affiliates
 for select
 to authenticated
 using (email = auth.jwt() ->> 'email' and is_active = true);
 
 -- Affiliates can read only referrals mapped to their profile.
-create policy if not exists "affiliate_can_read_own_referrals"
+create policy "affiliate_can_read_own_referrals"
 on public.affiliate_referrals
 for select
 to authenticated
